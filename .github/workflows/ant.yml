@@ -29,7 +29,7 @@ jobs:
       run: ant -noinput -buildfile build.xml
 
     - name: List files in build directory
-      run: ls -R build/
+      run: ls -R build/lib
 
     - name: Rename .jar file if necessary
       run: |
