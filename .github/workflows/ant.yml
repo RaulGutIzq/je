@@ -12,45 +12,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository
     - uses: actions/checkout@v4
-    
-    # Set up Java (you might want to change the JDK version to 1.5.0 or compatible)
+
     - name: Set up JDK 8
       uses: actions/setup-java@v4
       with:
         java-version: '8'
         distribution: 'temurin'
 
-    # Install Ant
     - name: Install Ant
       run: |
         sudo apt-get update
         sudo apt-get install -y ant
 
-    # Build the JE project using Ant
     - name: Build with Ant
       run: ant -noinput -buildfile build.xml
 
-    # Create a release in GitHub
+    - name: List files in build directory
+      run: ls -R build/
+
+    - name: Rename .jar file if necessary
+      run: |
+        mv build/lib/actual-name.jar build/lib/je-M.N.P.jar || echo "No need to rename"
+
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}  # Use branch/tag name or set it explicitly
+        tag_name: ${{ github.ref_name }}
         release_name: JE Release ${{ github.ref_name }}
         draft: false
         prerelease: false
 
-    # Upload the generated .jar file to the release
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: build/lib/je-7.5.11.jar  # Adjust this path based on your Ant build output
-        asset_name: je-7.5.11.jar  # Name of the uploaded asset
+        asset_path: build/lib/je-M.N.P.jar
+        asset_name: je-M.N.P.jar
         asset_content_type: application/java-archive
